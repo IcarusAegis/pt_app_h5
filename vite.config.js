@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import { resolve } from 'path';
 
 function readQuery(req) {
   return new URL(req.url || '/', 'http://localhost').searchParams;
@@ -102,5 +103,12 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        version: resolve(__dirname, 'version.html'),
+        demo: resolve(__dirname, 'demo.html'),
+      },
+    },
   },
 });
