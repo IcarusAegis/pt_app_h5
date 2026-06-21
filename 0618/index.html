@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=941, initial-scale=1" />
+    <title>科创智借 - 柜屏二维码</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="screen" aria-label="科创智借智能相机服务系统">
+      <header class="top-shell">
+        <img class="header-logo" src="./assets/yec-logo.png" alt="上海市普陀区青少年教育活动中心" />
+        <div class="online-pill" aria-label="设备在线">
+          <span></span>
+          设备在线
+        </div>
+      </header>
+
+      <section class="main-area">
+        <div class="white-circuit" aria-hidden="true"></div>
+        <div class="floor-ring" aria-hidden="true"></div>
+
+        <div class="headline">
+          <h2>普陀区青少年科创器材共享系统</h2>
+          <div class="headline-rule" aria-hidden="true">
+            <span></span>
+            <b></b>
+            <span></span>
+          </div>
+        </div>
+
+        <button class="service-card pickup" type="button" aria-label="扫码取件">
+          <span class="card-trace trace-a" aria-hidden="true"></span>
+          <span class="card-dots" aria-hidden="true"></span>
+          <span class="holo-stage" aria-hidden="true">
+            <svg class="scan-rings" viewBox="0 0 300 250">
+              <defs>
+                <radialGradient id="ringBlue" cx="50%" cy="72%" r="58%">
+                  <stop offset="0" stop-color="#7fffff" stop-opacity=".95" />
+                  <stop offset=".28" stop-color="#1bcbff" stop-opacity=".48" />
+                  <stop offset="1" stop-color="#007aff" stop-opacity="0" />
+                </radialGradient>
+              </defs>
+              <ellipse cx="150" cy="187" rx="116" ry="32" fill="url(#ringBlue)" />
+              <ellipse cx="150" cy="180" rx="112" ry="25" />
+              <ellipse cx="150" cy="180" rx="80" ry="18" />
+              <path d="M51 178h56m86 0h56M150 62v34M150 196v32" />
+              <circle cx="150" cy="123" r="101" />
+              <circle cx="150" cy="123" r="78" />
+              <circle cx="150" cy="123" r="55" />
+            </svg>
+            <svg class="cube" viewBox="0 0 230 220">
+              <defs>
+                <linearGradient id="cubeTop" x1="36" x2="183" y1="48" y2="116">
+                  <stop offset="0" stop-color="#ffffff" />
+                  <stop offset=".65" stop-color="#b8dcff" />
+                  <stop offset="1" stop-color="#70a4ff" />
+                </linearGradient>
+                <linearGradient id="cubeLeft" x1="51" x2="111" y1="92" y2="182">
+                  <stop offset="0" stop-color="#eef8ff" />
+                  <stop offset="1" stop-color="#75aaff" />
+                </linearGradient>
+                <linearGradient id="cubeRight" x1="116" x2="182" y1="88" y2="181">
+                  <stop offset="0" stop-color="#d7ecff" />
+                  <stop offset="1" stop-color="#4c80ec" />
+                </linearGradient>
+                <linearGradient id="checkGrad" x1="132" x2="198" y1="131" y2="196">
+                  <stop offset="0" stop-color="#53d7ff" />
+                  <stop offset="1" stop-color="#2454ff" />
+                </linearGradient>
+              </defs>
+              <path class="cube-shadow" d="M39 169c14 22 107 37 151 4 17 18-7 42-66 42-64 0-100-22-85-46z" />
+              <path class="cube-top" d="M31 76 111 31l82 45-82 47z" />
+              <path class="cube-left" d="M31 76v88l80 45v-86z" />
+              <path class="cube-right" d="M193 76v88l-82 45v-86z" />
+              <path class="cube-tape-a" d="M72 53 154 98v32l-22 12v-32L51 64z" />
+              <path class="cube-tape-b" d="M151 54 70 101v31l21 12v-32l82-47z" />
+              <circle class="check-bg" cx="172" cy="163" r="38" />
+              <path class="check-mark" d="m153 161 14 14 28-34" />
+            </svg>
+          </span>
+          <span class="service-text">
+            <strong>扫码取件</strong>
+            <em>扫一扫取出您的物品</em>
+          </span>
+          <span class="arrow-badge" aria-hidden="true">
+            <svg viewBox="0 0 64 64">
+              <path d="m24 16 18 16-18 16" />
+              <path d="m36 16 18 16-18 16" />
+            </svg>
+          </span>
+        </button>
+
+        <button class="service-card return" type="button" aria-label="扫码归还">
+          <span class="card-trace trace-b" aria-hidden="true"></span>
+          <span class="card-dots" aria-hidden="true"></span>
+          <span class="holo-stage" aria-hidden="true">
+            <svg class="scan-rings green" viewBox="0 0 300 250">
+              <ellipse cx="150" cy="187" rx="116" ry="32" />
+              <ellipse cx="150" cy="180" rx="112" ry="25" />
+              <ellipse cx="150" cy="180" rx="80" ry="18" />
+              <path d="M51 178h56m86 0h56M150 62v34M150 196v32" />
+              <circle cx="150" cy="123" r="101" />
+              <circle cx="150" cy="123" r="78" />
+              <circle cx="150" cy="123" r="55" />
+            </svg>
+            <svg class="return-box" viewBox="0 0 230 220">
+              <defs>
+                <linearGradient id="boxFace" x1="47" x2="177" y1="54" y2="187">
+                  <stop offset="0" stop-color="#f7ffff" />
+                  <stop offset=".54" stop-color="#91e4fa" />
+                  <stop offset="1" stop-color="#26b9e1" />
+                </linearGradient>
+                <linearGradient id="boxSide" x1="141" x2="205" y1="63" y2="169">
+                  <stop offset="0" stop-color="#d7fbff" />
+                  <stop offset="1" stop-color="#358dce" />
+                </linearGradient>
+                <linearGradient id="boxPanel" x1="70" x2="151" y1="112" y2="178">
+                  <stop offset="0" stop-color="#70fff1" />
+                  <stop offset="1" stop-color="#2ad1e8" />
+                </linearGradient>
+              </defs>
+              <path class="box-shadow" d="M34 169c15 26 112 42 155 4 16 20-9 44-69 44-64 0-101-23-86-48z" />
+              <path class="box-top" d="M54 59c2-14 16-25 32-26h74c19 0 36 15 38 34l-70 27z" />
+              <path class="box-side" d="M132 79h41c17 0 31 14 31 31v50c0 20-16 36-36 36h-36z" />
+              <rect class="box-face" x="37" y="62" width="139" height="132" rx="20" />
+              <rect class="slot" x="65" y="87" width="87" height="15" rx="3" />
+              <rect class="box-panel" x="63" y="116" width="91" height="58" rx="8" />
+              <path class="upload-arrow" d="M109 161v-38m0 0-23 22m23-22 23 22" />
+            </svg>
+          </span>
+          <span class="service-text">
+            <strong>扫码归还</strong>
+            <em>扫一扫存入您的物品</em>
+          </span>
+          <span class="arrow-badge" aria-hidden="true">
+            <svg viewBox="0 0 64 64">
+              <path d="m24 16 18 16-18 16" />
+              <path d="m36 16 18 16-18 16" />
+            </svg>
+          </span>
+        </button>
+      </section>
+
+      <footer class="bottom-shell">
+        <div class="bottom-grid" aria-hidden="true"></div>
+        <div class="status-block wifi">
+          <span class="status-icon">
+            <svg viewBox="0 0 80 80" aria-hidden="true">
+              <circle cx="40" cy="40" r="37" />
+              <path d="M19 35c12-12 30-12 42 0" />
+              <path d="M28 45c7-7 17-7 24 0" />
+              <path d="M36 55c2-2 6-2 8 0" />
+              <circle cx="40" cy="61" r="4" />
+            </svg>
+          </span>
+          <span>
+            <strong>可借器材 <b>26</b></strong>
+          </span>
+        </div>
+        <div class="footer-divider one" aria-hidden="true"></div>
+        <div class="status-block id">
+          <span class="device-icon">
+            <svg viewBox="0 0 72 72" aria-hidden="true">
+              <rect x="13" y="10" width="46" height="52" rx="8" />
+              <rect x="23" y="19" width="12" height="9" rx="2" />
+              <rect x="39" y="19" width="12" height="9" rx="2" />
+              <rect x="23" y="35" width="28" height="20" rx="3" />
+              <circle cx="37" cy="46" r="4" />
+            </svg>
+          </span>
+          <span>
+            <strong>已借出器材 <b>28</b></strong>
+          </span>
+        </div>
+        <div class="footer-divider two" aria-hidden="true"></div>
+        <div class="status-block healthy">
+          <span class="status-icon shield">
+            <svg viewBox="0 0 80 80" aria-hidden="true">
+              <circle cx="40" cy="40" r="37" />
+              <path d="M40 16 60 24v15c0 17-9 28-20 34-11-6-20-17-20-34V24z" />
+              <path d="m30 41 8 8 15-20" />
+            </svg>
+          </span>
+          <span>
+            <strong>本月借还 <b>61</b></strong>
+          </span>
+        </div>
+      </footer>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

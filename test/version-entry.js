@@ -58,6 +58,10 @@ async function load() {
     const mod = await import('./App-v13.vue');
     await import('./style-v13.css');
     App = mod.default;
+  } else if (v === 'v14') {
+    const mod = await import('./App-v14.vue');
+    await import('./style-v14.css');
+    App = mod.default;
   } else {
     // 默认 v5
     const mod = await import('./App-v5.vue');

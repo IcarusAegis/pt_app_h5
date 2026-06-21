@@ -4,11 +4,26 @@ const DEFAULT_VENDOR_TIMEOUT_SECONDS = 30;
 const DEFAULT_QR_WS_URL = 'ws://localhost:8080/ws/cabinet-h5';
 export const FIXED_CABINET_ID = '2441';
 const CABINET_ID_STORAGE_KEY = 'kc:cabinet-h5:identity';
+const ADMIN_CONFIG_KEY = 'v14_cabinet_config';
 const CABINET_CONFIG_GLOBALS = [
   '__KC_CABINET_CONFIG__',
   '__KECHUANG_CABINET_CONFIG__',
   '__CABINET_CONFIG__',
 ];
+
+// 读取管理员保存的配置
+function readAdminConfig() {
+  try {
+    const raw = window.localStorage.getItem(ADMIN_CONFIG_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        return parsed;
+      }
+    }
+  } catch {}
+  return null;
+}
 
 function getQuery() {
   return new URLSearchParams(window.location.search);
@@ -213,30 +228,64 @@ export function applyCabinetIdentity(config, value) {
 export function getRuntimeConfig() {
   const query = getQuery();
   const env = import.meta.env;
+  const adminConfig = readAdminConfig();
+
   const h5SessionId = readText(query, 'sid') || createSessionId();
   const allowLocalQr = readBoolean(query, 'allowLocalQr', String(env.VITE_ALLOW_LOCAL_QR || '').toLowerCase() === 'true');
-  const qrSource = normalizeQrSource(readText(query, 'source', env.VITE_QR_SOURCE || 'websocket'), allowLocalQr);
-  const explicitQrPublicBaseUrl = readText(query, 'qrBaseUrl', env.VITE_QR_PUBLIC_BASE_URL || '');
+
+  // 优先使用管理员保存的配置
+  function getValue(queryKey, envKey, fallback) {
+    // URL查询参数优先级最高
+    const queryValue = query.get(queryKey);
+    if (queryValue !== null && queryValue !== '') {
+      return queryValue.trim();
+    }
+    // 然后是管理员配置
+    if (adminConfig && adminConfig[queryKey] !== undefined && String(adminConfig[queryKey]).trim()) {
+      return String(adminConfig[queryKey]).trim();
+    }
+    // 最后是环境变量
+    const envValue = envKey ? env[envKey] : '';
+    if (envValue !== undefined && String(envValue).trim()) {
+      return String(envValue).trim();
+    }
+    return String(fallback || '').trim();
+  }
+
+  const qrSource = normalizeQrSource(getValue('source', 'VITE_QR_SOURCE', 'websocket'), allowLocalQr);
+  const explicitQrPublicBaseUrl = getValue('qrBaseUrl', 'VITE_QR_PUBLIC_BASE_URL', '');
   const cabinetIdentity = resolveCabinetIdentity(query);
+
+  // 管理员配置的boardId优先
+  let finalBoardId = cabinetIdentity.boardId;
+  let finalCabinetId = cabinetIdentity.cabinetId;
+  if (adminConfig && adminConfig.boardId) {
+    finalBoardId = String(adminConfig.boardId).trim();
+    finalCabinetId = finalBoardId;
+  }
+
+  const qrTtlSeconds = Number(getValue('ttl', 'VITE_QR_TTL_SECONDS', '60')) || 60;
+  const statusPollSeconds = Number(getValue('statusPoll', 'VITE_STATUS_POLL_SECONDS', '10')) || 10;
+  const vendorTimeoutSeconds = Number(getValue('timeout', 'VITE_VENDOR_TIMEOUT_SECONDS', String(DEFAULT_VENDOR_TIMEOUT_SECONDS))) || DEFAULT_VENDOR_TIMEOUT_SECONDS;
 
   return {
     h5SessionId,
-    vendorBaseUrl: normalizeBaseUrl(readText(query, 'baseUrl', env.VITE_VENDOR_BASE_URL || DEFAULT_VENDOR_BASE_URL)),
-    vendorUqKey: readText(query, 'uqKey', env.VITE_VENDOR_UQ_KEY || DEFAULT_UQ_KEY),
-    vendorSecret: readText(query, 'secret', env.VITE_VENDOR_SECRET || ''),
-    vendorTimeoutMs: readNumber(query, 'timeout', Number(env.VITE_VENDOR_TIMEOUT_SECONDS) || DEFAULT_VENDOR_TIMEOUT_SECONDS) * 1000,
-    boardId: cabinetIdentity.boardId,
-    cabinetId: cabinetIdentity.cabinetId,
-    qrTtlSeconds: readNumber(query, 'ttl', Number(env.VITE_QR_TTL_SECONDS) || 60),
+    vendorBaseUrl: normalizeBaseUrl(getValue('baseUrl', 'VITE_VENDOR_BASE_URL', DEFAULT_VENDOR_BASE_URL)),
+    vendorUqKey: getValue('uqKey', 'VITE_VENDOR_UQ_KEY', DEFAULT_UQ_KEY),
+    vendorSecret: getValue('secret', 'VITE_VENDOR_SECRET', ''),
+    vendorTimeoutMs: vendorTimeoutSeconds * 1000,
+    boardId: finalBoardId,
+    cabinetId: finalCabinetId,
+    qrTtlSeconds,
     qrSource,
-    qrPollUrl: readText(query, 'pollUrl', env.VITE_QR_POLL_URL || ''),
-    qrWsUrl: buildWsUrl(readText(query, 'wsUrl', env.VITE_QR_WS_URL || DEFAULT_QR_WS_URL), h5SessionId),
-    devQrFallbackUrl: readText(query, 'devQrFallbackUrl', env.VITE_DEV_QR_FALLBACK_URL || '/dev/cabinet-qr'),
+    qrPollUrl: getValue('pollUrl', 'VITE_QR_POLL_URL', ''),
+    qrWsUrl: buildWsUrl(getValue('wsUrl', 'VITE_QR_WS_URL', DEFAULT_QR_WS_URL), h5SessionId),
+    devQrFallbackUrl: getValue('devQrFallbackUrl', 'VITE_DEV_QR_FALLBACK_URL', '/dev/cabinet-qr'),
     qrPublicBaseUrl: explicitQrPublicBaseUrl || (qrSource === 'websocket' ? '' : getCurrentPageBaseUrl()),
-    statusPollSeconds: readNumber(query, 'statusPoll', Number(env.VITE_STATUS_POLL_SECONDS) || 10),
-    miniProgramAppId: readText(query, 'appId', env.VITE_MINIPROGRAM_APP_ID || ''),
-    miniProgramPath: readText(query, 'mpPath', env.VITE_MINIPROGRAM_PATH || '/pages/scan/index/index'),
-    wechatJsConfigUrl: readText(query, 'wxConfigUrl', env.VITE_WECHAT_JS_CONFIG_URL || ''),
+    statusPollSeconds,
+    miniProgramAppId: getValue('appId', 'VITE_MINIPROGRAM_APP_ID', ''),
+    miniProgramPath: getValue('mpPath', 'VITE_MINIPROGRAM_PATH', '/pages/scan/index/index'),
+    wechatJsConfigUrl: getValue('wxConfigUrl', 'VITE_WECHAT_JS_CONFIG_URL', ''),
   };
 }
 
