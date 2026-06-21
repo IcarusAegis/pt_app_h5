@@ -135,8 +135,8 @@
               <strong>{{ config.qrTtlSeconds }}s</strong>
             </div>
             <div>
-              <small>柜门数</small>
-              <strong>{{ doorStats.total || '--' }}</strong>
+              <small>返回主页</small>
+              <strong>{{ qrIdleCountdown > 0 ? qrIdleCountdown + 's' : '--' }}</strong>
             </div>
           </div>
 
@@ -229,7 +229,7 @@
         <!-- 密码验证步骤 -->
         <template v-if="adminStep === 'password'">
           <div class="v14-admin-hint">
-            请输入6位数字密码，默认密码：123456
+            请输入6位数字密码
           </div>
           <div v-if="passwordError" class="v14-admin-error">{{ passwordError }}</div>
 
@@ -411,7 +411,13 @@ function loadAdminForm() {
     const saved = localStorage.getItem(STORAGE_CONFIG_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      Object.assign(adminForm, parsed);
+      // 兼容旧版 key 与 config.js 读取的 key
+      adminForm.boardId = parsed.boardId ?? '';
+      adminForm.qrSource = parsed.source ?? parsed.qrSource ?? 'websocket';
+      adminForm.qrWsUrl = parsed.wsUrl ?? parsed.qrWsUrl ?? '';
+      adminForm.vendorBaseUrl = parsed.baseUrl ?? parsed.vendorBaseUrl ?? '';
+      adminForm.qrTtlSeconds = String(parsed.ttl ?? parsed.qrTtlSeconds ?? 60);
+      adminForm.statusPollSeconds = String(parsed.statusPoll ?? parsed.statusPollSeconds ?? 10);
       return;
     }
   } catch {}
@@ -477,13 +483,14 @@ function verifyPassword() {
 function saveConfig() {
   if (configTab.value === 'sys') {
     try {
+      // key 与 config.js 的 getValue 读取的查询参数名保持一致
       const toSave = {
         boardId: adminForm.boardId.trim(),
-        qrSource: adminForm.qrSource,
-        qrWsUrl: adminForm.qrWsUrl.trim(),
-        vendorBaseUrl: adminForm.vendorBaseUrl.trim(),
-        qrTtlSeconds: Number(adminForm.qrTtlSeconds) || 60,
-        statusPollSeconds: Number(adminForm.statusPollSeconds) || 10,
+        source: adminForm.qrSource,
+        wsUrl: adminForm.qrWsUrl.trim(),
+        baseUrl: adminForm.vendorBaseUrl.trim(),
+        ttl: Number(adminForm.qrTtlSeconds) || 60,
+        statusPoll: Number(adminForm.statusPollSeconds) || 10,
       };
       localStorage.setItem(STORAGE_CONFIG_KEY, JSON.stringify(toSave));
       alert('配置已保存！页面将刷新以应用新配置');
@@ -521,6 +528,29 @@ let wsStopped = false;
 
 function goHome() { viewState.value = 'home'; }
 function goToQr(newMode) { setMode(newMode); viewState.value = 'qr'; }
+
+// 取件/归还页面停留超过 60s 自动返回主页
+const QR_IDLE_TIMEOUT_SECONDS = 60;
+const qrIdleCountdown = ref(0);
+let qrIdleTimer = 0;
+function clearQrIdle() {
+  window.clearInterval(qrIdleTimer);
+  qrIdleTimer = 0;
+  qrIdleCountdown.value = 0;
+}
+function scheduleQrIdleReturn() {
+  clearQrIdle();
+  // 仅在取件/归还页且未弹出开柜动画时计时；动画期间等待开柜结果，不触发返回
+  if (viewState.value !== 'qr' || animationModalVisible.value) return;
+  qrIdleCountdown.value = QR_IDLE_TIMEOUT_SECONDS;
+  qrIdleTimer = window.setInterval(() => {
+    qrIdleCountdown.value -= 1;
+    if (qrIdleCountdown.value <= 0) {
+      clearQrIdle();
+      if (viewState.value === 'qr' && !animationModalVisible.value) goHome();
+    }
+  }, 1000);
+}
 
 const activeCopy = computed(() => MODE_COPY[mode.value]);
 const sourceText = computed(() => {
@@ -586,6 +616,7 @@ const availableCount = computed(() => {
 });
 
 watch(viewState, async (newState) => {
+  scheduleQrIdleReturn();
   if (newState === 'qr') {
     await nextTick();
     if (qrContent.value) {
@@ -856,11 +887,15 @@ function closeAnimationModal() {
   animationModalVisible.value = false;
   closeCountdown.value = 0;
   window.clearInterval(modalCountdownTimer);
+  // 弹窗关闭后若仍在取件/归还页，重新开始 60s 计时
+  scheduleQrIdleReturn();
 }
 
 function openAnimationModal() {
   animationModalVisible.value = true;
   window.clearInterval(modalCountdownTimer);
+  // 弹窗期间暂停 60s 自动返回计时
+  clearQrIdle();
   closeCountdown.value = 5;
   modalCountdownTimer = window.setInterval(() => {
     closeCountdown.value -= 1;
@@ -970,6 +1005,7 @@ onBeforeUnmount(() => {
   window.clearInterval(statusTimer);
   window.clearInterval(modalCountdownTimer);
   window.clearTimeout(postOpenQrRefreshTimer);
+  clearQrIdle();
   removeCabinetIdentityListeners();
   stopWebSocket();
 });
